@@ -4,7 +4,7 @@ VCDroid is ViewController library for Android which fixes Activities and Fragmen
 ## Why should I bother?
 Let's face it — Activities and Fragments are trash. And if you're coding for Android you always knew it — maybe just couldn't admit it.
 
-Activities are trash because they enforce your app to be the schizophrenic: fragmented, separated and scattered. Their launch takes ages, their animation is broken, transferring arguments between them is inconvinient (try to send bitmap from one to another without making copy of it).
+Activities are trash because they enforce your app to be the schizophrenic: fragmented, separated and scattered. Their launch takes ages, their animation is broken, transferring arguments between them is inconvenient (try to send bitmap from one to another without making copy of it).
 
 Fragments are trash due to their overly-complex, over-engineered lifecycle, two "standard" implementations — from SDK and from supportlib (one of which is always buggy), child nesting problems and stupid API (FragmentTransaction? FragmentManager? Are you INSANE?).
 
