@@ -108,6 +108,7 @@ public class NavigationController extends ViewController
 	{
 		super.onCreate();
 
+		current().onViewWillAppear(false);
 		contentView.addView(
 				current().getView(),
 				new ViewGroup.LayoutParams(
@@ -116,7 +117,6 @@ public class NavigationController extends ViewController
 		);
 
 		refreshToolbar();
-
 		getToolbar().setNavigationOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -125,6 +125,7 @@ public class NavigationController extends ViewController
 				onBackPressed();
 			}
 		});
+		current().onViewDidAppear(false);
 	} // onCreate
 
 	@Override
@@ -136,6 +137,17 @@ public class NavigationController extends ViewController
 		}
 
 		super.onDestroy();
+	}
+
+	@Override
+	public void onLowMemory()
+	{
+		for(ViewController controller : controllers)
+		{
+			controller.onLowMemory();
+		}
+
+		super.onLowMemory();
 	}
 
 	private ViewController current()
@@ -340,7 +352,7 @@ public class NavigationController extends ViewController
 
 		if(getPresentingController() != null)
 		{
-			dismissController(true, null);
+			dismissController(null, true, null);
 			return true;
 		}
 

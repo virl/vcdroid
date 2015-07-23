@@ -14,7 +14,11 @@ android {
         versionName "1.0"
     }
     buildTypes {
+        debug {
+            buildConfigField "Boolean", "DEBUG_MY", "true"
+        }
         release {
+            buildConfigField "Boolean", "DEBUG_MY", "true"
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

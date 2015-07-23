@@ -7,6 +7,8 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
+import java.util.Date;
+
 import io.vcdroidkit.controllers.NavigationController;
 import io.vcdroidkit.controllers.TabBarController;
 import io.vcdroidkit.controllers.ViewController;

@@ -128,6 +128,17 @@ public class TabBarController extends ViewController
 	}
 
 	@Override
+	public void onLowMemory()
+	{
+		for(ViewController controller : controllers)
+		{
+			controller.onLowMemory();
+		}
+
+		super.onLowMemory();
+	}
+
+	@Override
 	public boolean onBackPressed()
 	{
 		// NOT calling super() here.
@@ -145,7 +156,7 @@ public class TabBarController extends ViewController
 
 		if(getPresentingController() != null)
 		{
-			dismissController(true, null);
+			dismissController(null, true, null);
 			return true;
 		}
 

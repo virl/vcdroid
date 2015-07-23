@@ -36,6 +36,8 @@ public class ViewController
 	private ViewController parentController;
 	private ViewController presentingController;
 	private ViewController presentedController;
+	private ViewController sourceController; // who called presentController()
+
 	private TransitionListener transitionListener;
 
 	public ViewController(AppCompatActivity activity)
@@ -141,19 +143,33 @@ public class ViewController
 		}
 	}
 
+	public void onLowMemory()
+	{
+		if(getPresentedController() != null)
+			getPresentedController().onLowMemory();
+	}
+
 	public void onViewWillAppear(boolean animated)
 	{
+		getView();
 	}
 
 	public void onViewDidAppear(boolean animated)
 	{
+		getView();
 	}
 
 	public void onViewWillDisappear(boolean animated)
 	{
+		getView();
 	}
 
 	public void onViewDidDisappear(boolean animated)
+	{
+		getView();
+	}
+
+	public void onPresentedDismissed(Object result, boolean animated)
 	{
 	}
 
@@ -169,7 +185,7 @@ public class ViewController
 
 		if(getPresentingController() != null)
 		{
-			dismissController(true, null);
+			dismissController(null, true, null);
 			return true;
 		}
 
@@ -195,20 +211,6 @@ public class ViewController
 		return controller;
 	}
 
-	private ViewController getRootPresentingController()
-	{
-		ViewController controller = getRootParentController();
-		while(true)
-		{
-			if(controller.getPresentingController() == null)
-				break;
-
-			controller = getPresentingController();
-		}
-
-		return controller;
-	}
-
 	public ViewController getPresentingController()
 	{
 		return presentingController;
@@ -219,6 +221,11 @@ public class ViewController
 		return presentedController;
 	}
 
+	public ViewController getSourceController()
+	{
+		ViewController controller = getRootParentController();
+		return controller.sourceController;
+	}
 
 	public NavigationController getNavigationController()
 	{
@@ -309,6 +316,7 @@ public class ViewController
 		final ViewController presenting = getRootParentController();
 		presenting.presentedController = presented;
 		presented.presentingController = presenting;
+		presented.sourceController = this;
 
 		final ViewGroup contentView = (ViewGroup) presenting.getView().getParent();
 
@@ -352,19 +360,19 @@ public class ViewController
 		animator.animateTransition(transitionContext);
 	}
 
-	public void dismissController(final boolean animated, @Nullable final Runnable completion)
+	public void dismissController(final Object result, final boolean animated, @Nullable final Runnable completion)
 	{
-		if(getPresentingController() == null)
-			return;
-
-		final ViewController presenting = this.presentingController;
-		final ViewController presented = this;
+		final ViewController presenting = getRootParentController().getPresentingController();
+		final ViewController presented = getRootParentController();
 		final ViewGroup contentView = (ViewGroup) presented.getView().getParent();
 
-		this.onViewWillDisappear(animated);
+		if(presenting == null)
+			return;
+
+		presented.onViewWillDisappear(animated);
 		presenting.onViewWillAppear(animated);
 
-		this.presentingController = null;
+		presented.presentingController = null;
 		presenting.presentedController = null;
 
 		final TransitionAnimator animator = getTransitionAnimator(true, presented, presenting, this);
@@ -385,6 +393,9 @@ public class ViewController
 				presenting.onViewDidAppear(animated);
 				if(completion != null)
 					completion.run();
+
+				if(presented.sourceController != null)
+					presented.sourceController.onPresentedDismissed(result, animated);
 			}
 		};
 
