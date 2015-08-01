@@ -6,21 +6,24 @@ import android.widget.RelativeLayout;
 public class DumbTransitionAnimator implements TransitionAnimator
 {
 	@Override
-	public void animateTransition(TransitionContext transitionContext)
+	public void animateTransition(TransitionContext context)
 	{
-		ViewGroup containerView = transitionContext.getContainerView();
+		ViewGroup containerView = context.getContainerView();
 
 		RelativeLayout.LayoutParams params =
 				new RelativeLayout.LayoutParams(
 						ViewGroup.LayoutParams.MATCH_PARENT,
 						ViewGroup.LayoutParams.MATCH_PARENT);
 
-		containerView.addView(
-				transitionContext.getToView(),
-				params
-		);
+		if(context.shouldAddToView())
+		{
+			containerView.addView(
+					context.getToView(),
+					params
+			);
+		}
 
-		transitionContext.completeTransition(true);
+		context.completeTransition(true);
 	}
 
 	@Override

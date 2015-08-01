@@ -7,11 +7,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.Random;
 
+import io.vcdroidkit.controllers.ImagePickerController;
 import io.vcdroidkit.controllers.NavigationController;
 import io.vcdroidkit.controllers.RootView;
 import io.vcdroidkit.controllers.ViewController;
@@ -37,16 +39,24 @@ public class FooController extends ViewController
 		view.setId(new Random().nextInt());
 		view.setBackgroundColor(new Random().nextInt(0x01000000) + 0xFF000000);
 
-		TextView textView = new TextView(getActivity());
-		textView.setText(this.getTitle());
-		//textView.setTextColor(new Random().nextInt(0x01000000) + 0xFF000000);
+		Button button = new Button(getActivity());
+		button.setText("Controller " + this.getTitle());
+
+		button.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				image();
+			}
+		});
 
 		RelativeLayout.LayoutParams params =
 				new RelativeLayout.LayoutParams(
 						ViewGroup.LayoutParams.WRAP_CONTENT,
 						ViewGroup.LayoutParams.WRAP_CONTENT);
 		params.addRule(RelativeLayout.CENTER_IN_PARENT, view.getId());
-		view.addView(textView, params);
+		view.addView(button, params);
 
 		return view;
 	}
@@ -124,4 +134,25 @@ public class FooController extends ViewController
 		getNavigationController().pushController(controller, true);
 	}
 
+	private void image()
+	{
+		ImagePickerController controller = new ImagePickerController(
+				getActivity(),
+				new ImagePickerController.Listener()
+				{
+					@Override
+					public void onPickedImage(ImagePickerController.ImageInfo imageInfo)
+					{
+
+					}
+
+					@Override
+					public void onCancel()
+					{
+
+					}
+				});
+
+		presentController(controller, false, null);
+	}
 } // FooController

@@ -1,5 +1,6 @@
 package io.vcdroidkit.controllers.tabs;
 
+import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,12 +14,20 @@ import io.vcdroidkit.controllers.ViewController;
 
 public class ControllerPagerAdapter extends PagerAdapter
 {
+	public interface Listener
+	{
+		void onPrimaryItemChanged(@Nullable ViewController controller);
+	}
+
 	private List<ViewController> items = new ArrayList<>();
 	private Set<ViewController> itemsMoved = new HashSet<>();
 	private ViewController primaryItem = null;
 
-	public ControllerPagerAdapter()
+	private Listener listener;
+
+	public ControllerPagerAdapter(Listener listener)
 	{
+		this.listener = listener;
 	}
 
 	public void addController(ViewController controller)
@@ -60,10 +69,12 @@ public class ControllerPagerAdapter extends PagerAdapter
 		return primaryItem;
 	}
 
+	@Override
 	public void setPrimaryItem(ViewGroup container, int position, Object object)
 	{
 		if(primaryItem == object)
 			return;
+
 		if(primaryItem != null)
 		{
 			primaryItem.onViewWillDisappear(true);
@@ -76,8 +87,10 @@ public class ControllerPagerAdapter extends PagerAdapter
 		{
 			primaryItem.onViewWillAppear(true);
 			primaryItem.onViewDidAppear(true);
-			primaryItem.refreshToolbar();
 		}
+
+		if(listener != null)
+			listener.onPrimaryItemChanged(primaryItem);
 	}
 
 	@Override

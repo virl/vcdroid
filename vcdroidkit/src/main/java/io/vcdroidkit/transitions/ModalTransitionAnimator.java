@@ -43,11 +43,14 @@ public class ModalTransitionAnimator implements TransitionAnimator
 
 		int fromIndex = containerView.indexOfChild(context.getFromView());
 
-		containerView.addView(
-				context.getToView(),
-				dismiss ? fromIndex : containerView.getChildCount(),
-				params
-		);
+		if(context.shouldAddToView())
+		{
+			containerView.addView(
+					context.getToView(),
+					dismiss ? fromIndex : containerView.getChildCount(),
+					params
+			);
+		}
 
 		if(!context.isAnimated())
 		{

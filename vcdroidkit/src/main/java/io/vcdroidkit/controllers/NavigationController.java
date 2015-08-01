@@ -16,6 +16,7 @@ import java.util.Stack;
 import io.vcdroidkit.transitions.SlideTransitionAnimator;
 import io.vcdroidkit.transitions.TransitionAnimator;
 import io.vcdroidkit.transitions.TransitionContextImpl;
+import io.vcdroidkit.util.Logger;
 
 public class NavigationController extends ViewController
 {
@@ -40,8 +41,6 @@ public class NavigationController extends ViewController
 	private int toolbarId;
 	private int buttonUpId;
 
-	private Stack<ViewController> controllers = new Stack<>();
-
 	private Toolbar toolbar;
 	private RelativeLayout contentView;
 
@@ -53,6 +52,8 @@ public class NavigationController extends ViewController
 	)
 	{
 		super(activity);
+
+		Logger.log();
 		this.toolbarId = toolbarId;
 		this.buttonUpId = buttonUpId;
 
@@ -79,6 +80,8 @@ public class NavigationController extends ViewController
 	@Override
 	protected View onCreateView(LayoutInflater inflater, RootView rootView)
 	{
+		Logger.log();
+
 		RelativeLayout view = new RelativeLayout(getActivity());
 
 		toolbar = (Toolbar) inflater.inflate(toolbarId, rootView, false);
@@ -108,7 +111,8 @@ public class NavigationController extends ViewController
 	{
 		super.onCreate();
 
-		current().onViewWillAppear(false);
+		Logger.log();
+
 		contentView.addView(
 				current().getView(),
 				new ViewGroup.LayoutParams(
@@ -125,17 +129,12 @@ public class NavigationController extends ViewController
 				onBackPressed();
 			}
 		});
-		current().onViewDidAppear(false);
 	} // onCreate
 
 	@Override
 	protected void onDestroy()
 	{
-		for (ViewController controller : controllers)
-		{
-			controller.destroy();
-		}
-
+		Logger.log();
 		super.onDestroy();
 	}
 
@@ -148,6 +147,30 @@ public class NavigationController extends ViewController
 		}
 
 		super.onLowMemory();
+	}
+
+	public void onViewWillAppear(boolean animated)
+	{
+		super.onViewWillAppear(animated);
+		current().onViewWillAppear(animated);
+	}
+
+	public void onViewDidAppear(boolean animated)
+	{
+		super.onViewDidAppear(animated);
+		current().onViewDidAppear(animated);
+	}
+
+	public void onViewWillDisappear(boolean animated)
+	{
+		super.onViewWillDisappear(animated);
+		current().onViewWillDisappear(animated);
+	}
+
+	public void onViewDidDisappear(boolean animated)
+	{
+		super.onViewDidDisappear(animated);
+		current().onViewDidDisappear(animated);
 	}
 
 	private ViewController current()
@@ -169,12 +192,8 @@ public class NavigationController extends ViewController
 		return current();
 	}
 
-	@Override
 	public void refreshToolbar()
 	{
-		if(!isCreated())
-			return;
-
 		//Title
 		getToolbar().setTitle(this.getTitle());
 
@@ -266,6 +285,7 @@ public class NavigationController extends ViewController
 						previous.getView(),
 						current().getView(),
 						animated,
+						true,
 						callback
 				);
 
@@ -313,6 +333,7 @@ public class NavigationController extends ViewController
 						previous.getView(),
 						current().getView(),
 						animated,
+						true,
 						callback
 				);
 
@@ -326,7 +347,6 @@ public class NavigationController extends ViewController
 	public void addChildController(ViewController controller)
 	{
 		super.addChildController(controller);
-		controllers.push(controller);
 	}
 
 	@Override

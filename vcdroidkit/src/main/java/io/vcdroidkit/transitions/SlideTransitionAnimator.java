@@ -33,11 +33,14 @@ public class SlideTransitionAnimator implements TransitionAnimator
 
 		int fromIndex = containerView.indexOfChild(context.getFromView());
 
-		containerView.addView(
-				context.getToView(),
-				push ? containerView.getChildCount() : fromIndex,
-				params
-		);
+		if(context.shouldAddToView())
+		{
+			containerView.addView(
+					context.getToView(),
+					push ? containerView.getChildCount() : fromIndex,
+					params
+			);
+		}
 
 		if(!context.isAnimated())
 		{

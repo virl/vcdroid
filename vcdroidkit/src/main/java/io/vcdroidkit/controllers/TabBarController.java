@@ -1,6 +1,7 @@
 package io.vcdroidkit.controllers;
 
 import android.support.annotation.LayoutRes;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -40,7 +41,14 @@ public class TabBarController extends ViewController
 		this.tabLayoutId = tabLayoutId;
 		this.viewPagerId = viewPagerId;
 
-		this.pagerAdapter = new ControllerPagerAdapter();
+		this.pagerAdapter = new ControllerPagerAdapter(new ControllerPagerAdapter.Listener()
+		{
+			@Override
+			public void onPrimaryItemChanged(@Nullable ViewController controller)
+			{
+				invalidateToolbar();
+			}
+		});
 	}
 
 	public TabLayout getTabLayout()
@@ -112,16 +120,15 @@ public class TabBarController extends ViewController
 		viewPager.setAdapter(pagerAdapter);
 		viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 		tabLayout.setOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager));
-
-		refreshToolbar();
 	} // onCreate
 
 	@Override
 	protected void onDestroy()
 	{
-		for(ViewController controller : controllers)
+		if(pagerAdapter.getPrimaryItem() != null)
 		{
-			controller.destroy();
+			pagerAdapter.getPrimaryItem().onViewWillDisappear(false);
+			pagerAdapter.getPrimaryItem().onViewDidDisappear(false);
 		}
 
 		super.onDestroy();
@@ -193,8 +200,6 @@ public class TabBarController extends ViewController
 
 		controller.didMoveToParentController(this);
 		pagerAdapter.notifyDataSetChanged();
-
-		refreshToolbar();
 	}
 
 	public void removeTab(int position)
@@ -209,8 +214,6 @@ public class TabBarController extends ViewController
 
 		getTabLayout().removeTabAt(position);
 		pagerAdapter.notifyDataSetChanged();
-
-		refreshToolbar();
 	}
 
 } // TabBarController

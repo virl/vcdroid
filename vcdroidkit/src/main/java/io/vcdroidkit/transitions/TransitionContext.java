@@ -55,4 +55,10 @@ public interface TransitionContext
 	 * whether the transition should be animated.
 	 */
 	boolean isAnimated();
+
+	/**
+	 * @return true if transition animator should add the "To View" to the container view,
+	 * otherwise false.
+	 */
+	boolean shouldAddToView();
 }

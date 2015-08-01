@@ -1,5 +1,6 @@
 package io.vcdroidkit.controllers;
 
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.internal.view.menu.MenuBuilder;
@@ -10,12 +11,15 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Stack;
 
 import io.vcdroidkit.transitions.ModalTransitionAnimator;
 import io.vcdroidkit.transitions.TransitionAnimator;
 import io.vcdroidkit.transitions.TransitionContextImpl;
 import io.vcdroidkit.transitions.TransitionListener;
+import io.vcdroidkit.util.Logger;
 
 public class ViewController
 {
@@ -26,13 +30,25 @@ public class ViewController
 		DESTROYED
 	}
 
+	private enum ViewState
+	{
+		DID_DISAPPEAR,
+		WILL_APPEAR,
+		DID_APPEAR,
+		WILL_DISAPPEAR
+	}
+
 	private AppCompatActivity activity;
 	private RootView view;
 	private MenuBuilder menu;
+	protected Stack<ViewController> controllers = new Stack<>();
 
 	private String title = "";
 
+	private boolean opaque = true;
 	private State state = State.NONE;
+	private ViewState viewState = ViewState.DID_DISAPPEAR;
+
 	private ViewController parentController;
 	private ViewController presentingController;
 	private ViewController presentedController;
@@ -53,12 +69,52 @@ public class ViewController
 	public void setTitle(String title)
 	{
 		this.title = title;
-		refreshToolbar();
+
+		if(state == State.CREATED && this.getParentController() != null)
+			invalidateToolbar();
+	}
+
+	/**
+	 * @return if true, presenting controller's view will be removed from parent view
+	 * after this controller is presented. Default is true.
+	 */
+	public boolean isOpaque()
+	{
+		return opaque;
+	}
+
+	/**
+	 * @param opaque if true, presenting controller's view will be removed from parent view
+	 * after this controller is presented.
+	 */
+	public void setOpaque(boolean opaque)
+	{
+		this.opaque = opaque;
 	}
 
 	protected boolean isCreated()
 	{
 		return state == State.CREATED;
+	}
+
+	public boolean isInteractionEnabled()
+	{
+		return getView().isInteractionEnabled();
+	}
+
+	private long lastClickTime = 0;
+
+	public boolean shouldHandleClick()
+	{
+		if(!isInteractionEnabled())
+			return false;
+
+		if(new Date().getTime() - lastClickTime < 1000)
+			return false;
+
+		lastClickTime = new Date().getTime();
+
+		return true;
 	}
 
 	public void destroy()
@@ -113,7 +169,7 @@ public class ViewController
 		this.view = view;
 	}
 
-	public void refreshToolbar()
+	public void invalidateToolbar()
 	{
 		NavigationController navigationController = getNavigationController();
 		if(navigationController == null)
@@ -133,10 +189,18 @@ public class ViewController
 
 	protected void onCreate()
 	{
+		Logger.log();
 	}
 
 	protected void onDestroy()
 	{
+		Logger.log();
+
+		for (ViewController controller : new ArrayList<>(controllers))
+		{
+			controller.destroy();
+		}
+
 		if(presentedController != null)
 		{
 			presentedController.destroy();
@@ -151,21 +215,41 @@ public class ViewController
 
 	public void onViewWillAppear(boolean animated)
 	{
+		Logger.log();
+		if(viewState != ViewState.DID_DISAPPEAR)
+			throw new IllegalStateException("viewState != DID_DISAPPEAR");
+
+		viewState = ViewState.WILL_APPEAR;
 		getView();
 	}
 
 	public void onViewDidAppear(boolean animated)
 	{
+		Logger.log();
+		if(viewState != ViewState.WILL_APPEAR)
+			throw new IllegalStateException("viewState != WILL_APPEAR");
+
+		viewState = ViewState.DID_APPEAR;
 		getView();
 	}
 
 	public void onViewWillDisappear(boolean animated)
 	{
+		Logger.log();
+		if(viewState != ViewState.DID_APPEAR)
+			throw new IllegalStateException("viewState != DID_APPEAR");
+
+		viewState = ViewState.WILL_DISAPPEAR;
 		getView();
 	}
 
 	public void onViewDidDisappear(boolean animated)
 	{
+		Logger.log();
+		if(viewState != ViewState.WILL_DISAPPEAR)
+			throw new IllegalStateException("viewState != WILL_DISAPPEAR");
+
+		viewState = ViewState.DID_DISAPPEAR;
 		getView();
 	}
 
@@ -190,6 +274,20 @@ public class ViewController
 		}
 
 		return false;
+	}
+
+	public void startActivityForResult(Intent intent, int requestCode)
+	{
+		getActivity().startActivityForResult(intent, requestCode);
+	}
+
+	public void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		if(getPresentedController() != null)
+			getPresentedController().onActivityResult(requestCode, resultCode, data);
+
+		for(ViewController controller : new ArrayList<>(this.controllers))
+			controller.onActivityResult(requestCode, resultCode, data);
 	}
 
 	public ViewController getParentController()
@@ -263,6 +361,7 @@ public class ViewController
 	public void addChildController(ViewController controller)
 	{
 		controller.willMoveToParentController(this);
+		controllers.push(controller);
 	}
 
 	public void removeFromParentController()
@@ -278,10 +377,11 @@ public class ViewController
 	{
 		this.parentController = parent;
 		if(parent == null)
+		{
 			destroy();
+		}
 		else
 		{
-			refreshToolbar();
 		}
 	}
 
@@ -334,7 +434,9 @@ public class ViewController
 				presented.getView().enableInteraction();
 				animator.onAnimationEnded(transitionContext.isCompleted());
 
-				contentView.removeView(presenting.getView());
+				if(presented.isOpaque())
+					contentView.removeView(presenting.getView());
+
 				presenting.onViewDidDisappear(animated);
 
 				presented.onViewDidAppear(animated);
@@ -352,6 +454,7 @@ public class ViewController
 						presenting.getView(),
 						presented.getView(),
 						animated,
+						true,
 						callback
 				);
 
@@ -407,6 +510,7 @@ public class ViewController
 						presented.getView(),
 						presenting.getView(),
 						animated,
+						presented.isOpaque(),
 						callback
 				);
 

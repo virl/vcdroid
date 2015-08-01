@@ -18,6 +18,7 @@ public class TransitionContextImpl implements TransitionContext
 	private View fromView;
 	private View toView;
 	private boolean animated;
+	private boolean shouldAddToView;
 	private boolean completed;
 
 	private Callback callback;
@@ -29,6 +30,7 @@ public class TransitionContextImpl implements TransitionContext
 	        View fromView,
 	        View toView,
 	        boolean animated,
+			boolean shouldAddToView,
 			Callback callback
 	)
 	{
@@ -38,6 +40,7 @@ public class TransitionContextImpl implements TransitionContext
 		this.fromView = fromView;
 		this.toView = toView;
 		this.animated = animated;
+		this.shouldAddToView = shouldAddToView;
 
 		this.callback = callback;
 	}
@@ -88,5 +91,11 @@ public class TransitionContextImpl implements TransitionContext
 	public boolean isAnimated()
 	{
 		return animated;
+	}
+
+	@Override
+	public boolean shouldAddToView()
+	{
+		return shouldAddToView;
 	}
 } // TransitionContextImpl

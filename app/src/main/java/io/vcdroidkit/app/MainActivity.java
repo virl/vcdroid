@@ -1,5 +1,6 @@
 package io.vcdroidkit.app;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -51,6 +52,18 @@ public class MainActivity extends AppCompatActivity
 		tabBarController = new TabBarController(this, R.layout.tablayout_main, R.layout.viewpager_main);
 		tabBarController.setTitle(getString(R.string.app_name));
 
+		rootController = new NavigationController(
+				this,
+				tabBarController,
+				R.layout.toolbar_main,
+				android.support.v7.appcompat.R.drawable.abc_ic_ab_back_mtrl_am_alpha
+				);
+		rootController.setTitle("Navigation");
+
+		rootController.onViewWillAppear(false);
+		activityView.addView(rootController.getView(), params);
+		rootController.onViewDidAppear(false);
+
 		controller = new FooController(this);
 		controller.setTitle("1");
 		tabBarController.addTab("First", controller);
@@ -62,17 +75,7 @@ public class MainActivity extends AppCompatActivity
 		controller = new FooController(this);
 		controller.setTitle("3");
 		tabBarController.addTab("Third", controller);
-
-		rootController = new NavigationController(
-				this,
-				tabBarController,
-				R.layout.toolbar_main,
-				android.support.v7.appcompat.R.drawable.abc_ic_ab_back_mtrl_am_alpha
-				);
-		rootController.setTitle("Navigation");
-
-		activityView.addView(rootController.getView(), params);
-	}
+	} // configureController
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
@@ -109,4 +112,12 @@ public class MainActivity extends AppCompatActivity
 
 		super.onBackPressed();
 	}
-}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		rootController.onActivityResult(requestCode, resultCode, data);
+
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+} // MainActivity
