@@ -2,6 +2,7 @@
 VCDroid is ViewController library for Android which fixes Activities and Fragments by eliminating them from your app.
 
 ## Features
+* Automatic & sane backstack management (UP/BACK buttons just work).
 * Modal dialogs with seamless animation.
 * NavigationController with stack of sub-controllers.
 * TabBarController for Material tabs.
