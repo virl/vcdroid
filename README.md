@@ -1,6 +1,12 @@
 # vcdroid
 VCDroid is ViewController library for Android which fixes Activities and Fragments by eliminating them from your app.
 
+## Features
+* Modal dialogs with seamless animation.
+* NavigationController with stack of sub-controllers.
+* TabBarController for Material tabs.
+* ImagePickerController for importing photos from camera or system gallery.
+
 ## Why should I bother?
 Let's face it — Activities and Fragments are trash. And if you're coding for Android you always knew it — maybe just couldn't admit it.
 
