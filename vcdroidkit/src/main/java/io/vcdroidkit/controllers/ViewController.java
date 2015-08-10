@@ -402,13 +402,21 @@ public class ViewController
 	        ViewController source
 	)
 	{
-		if(transitionListener == null)
-			return new ModalTransitionAnimator(getActivity(), 300, dismissing);
+		TransitionListener presentedListener = presentedController.getTransitionListener();
+		TransitionAnimator animator = null;
 
-		if(dismissing)
-			return transitionListener.getAnimatorForDismissal(presentedController);
+		if(presentedListener != null)
+		{
+			if (dismissing)
+				animator = presentedListener.getAnimatorForDismissal(presentedController);
+			else
+				animator = presentedListener.getAnimatorForPresentation(presentedController, presentingController, source);
+		}
 
-		return transitionListener.getAnimatorForPresentation(presentedController, presentingController, source);
+		if(animator == null)
+			animator = new ModalTransitionAnimator(getActivity(), 300, dismissing);
+
+		return animator;
 	}
 
 	public void presentController(final ViewController presented, final boolean animated, @Nullable final Runnable completion)

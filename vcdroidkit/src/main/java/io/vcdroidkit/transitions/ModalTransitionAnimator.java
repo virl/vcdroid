@@ -208,7 +208,6 @@ public class ModalTransitionAnimator implements TransitionAnimator
 	@Override
 	public void onAnimationEnded(boolean transitionCompleted)
 	{
-
 	}
 
 	@Override
