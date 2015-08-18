@@ -1,6 +1,10 @@
 # vcdroid
 VCDroid is ViewController library for Android which fixes Activities and Fragments by eliminating them from your app.
 
+http://www.youtube.com/watch?v=4S4vr23qB7k
+
+http://www.youtube.com/watch?v=dqelBt0HQJs
+
 ##Author
 Email: virlof@gmail.com
 
